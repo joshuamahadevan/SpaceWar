@@ -17,7 +17,6 @@ addEventListener("mousemove", (e) => {
     player.my=e.clientY;
 })
 
-
 class Player{
     constructor(){
         this.x=innerWidth/2;
@@ -35,12 +34,12 @@ class Player{
         img.src="svgs/player.svg"
         c.save()
         c.translate(this.x,this.y)
-        c.rotate(this.angle)
+        c.rotate(this.angle+Math.PI/2)
         c.drawImage(img,-this.size/2, -this.size/2, this.size,this.size)
         c.restore();
     }
     update(){
-        this.angle=Math.atan2(this.my-this.y, this.mx-this.x) + Math.PI/2;
+        this.angle=Math.atan2(this.my-this.y, this.mx-this.x);
 
         if( this.controls.includes("left") ){
             this.x-=this.speed;
@@ -57,6 +56,31 @@ class Player{
     }
 }
 
+var projectiles=[];
+
+class Projectile{
+    constructor(x,y,angle){
+        this.x=x;
+        this.y=y;
+        this.angle=angle;
+        this.speed=7;
+    }
+    draw(){
+        this.update()
+        c.beginPath();
+        c.arc(this.x, this.y, 10, 0, Math.PI*2);
+        c.fillStyle="red"
+        c.fill();
+    }
+    update(){
+        this.x+=this.speed*Math.cos(this.angle);
+        this.y+=this.speed*Math.sin(this.angle);
+    }
+}
+
+addEventListener("click", () => {
+    projectiles.push(new Projectile(player.x, player.y, player.angle))
+})
 var player=new Player();
 
 addEventListener("keydown", (e)=>{
@@ -103,6 +127,11 @@ addEventListener("keyup", (e)=>{
 function play(){
     requestAnimationFrame(play);
     c.clearRect(0,0,innerWidth,innerHeight)
+
+    
+    projectiles.forEach( (e) => {
+        e.draw();
+    })
 
     player.draw()
 }
