@@ -53,6 +53,16 @@ class Player{
         if( this.controls.includes("down") ){
             this.y+=this.speed;
         }
+
+        if(this.x <0){
+            this.x=0;
+        }if(this.y <0){
+            this.y=0;
+        }if(this.x > innerWidth){
+            this.x=innerWidth;
+        }if(this.y > innerHeight){
+            this.y=innerHeight;
+        }
     }
 }
 
@@ -123,17 +133,41 @@ addEventListener("keyup", (e)=>{
     }
 })
 
+function Cleanup(){
+    for (let i=0; i<projectiles.length; i++){
+        let x=projectiles[i].x;
+        let y=projectiles[i].y;
+        let flag=0;
+
+        if(x <0){
+            flag=1;
+        }if(y <0){
+            flag=1;
+        }if(x > innerWidth){
+            flag=1;
+        }if(y > innerHeight){
+            flag=1;
+        }
+
+        if(flag){
+            projectiles.splice(i,1)
+            i--;
+        }
+    }
+}
 
 function play(){
     requestAnimationFrame(play);
     c.clearRect(0,0,innerWidth,innerHeight)
 
-    
+    Cleanup();
     projectiles.forEach( (e) => {
         e.draw();
     })
 
     player.draw()
+
+    console.log(projectiles)
 }
 
 play()
