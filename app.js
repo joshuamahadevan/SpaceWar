@@ -124,19 +124,19 @@ addEventListener("click", () => {
 var player=new Player();
 
 addEventListener("keydown", (e)=>{
-    if(e.key=="a" || e.key=="ArrowLeft"){
+    if(e.key=="a" || e.key=="ArrowLeft" || e.key=="A"){
         if( !player.controls.includes("left") ){
             player.controls.push("left")
         }
-    }else if(e.key=="w" || e.key=="ArrowUp"){
+    }else if(e.key=="w" || e.key=="ArrowUp" ||e.key=="W"){
         if( !player.controls.includes("up") ){
             player.controls.push("up")
         }
-    }else if(e.key=="s" || e.key=="ArrowDown"){
+    }else if(e.key=="s" || e.key=="ArrowDown" || e.key=="S"){
         if( !player.controls.includes("down") ){
             player.controls.push("down")
         }
-    }else if(e.key=="d" || e.key=="ArrowRight"){
+    }else if(e.key=="d" || e.key=="ArrowRight" || e.key=="D"){
         if( !player.controls.includes("right") ){
             player.controls.push("right")
         }
@@ -316,4 +316,12 @@ function terminate(){
     clearTimeout(EnemySpawn)
     clearTimeout(timeId)
     document.getElementById("end-box").style.display=""
+    if(localStorage.getItem("highscore")==null){
+        localStorage.setItem("highscore", score);
+    }
+    else if(localStorage.getItem("highscore") < score){
+        localStorage.setItem("highscore", score)
+    }
+    document.getElementById("end-score").innerHTML=score;
+    document.getElementById("end-highscore").innerHTML=` HIGHSCORE - ${localStorage.getItem("highscore")}`
 }
