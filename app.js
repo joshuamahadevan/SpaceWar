@@ -8,8 +8,6 @@ function resize(){
     c.canvas.height=innerHeight-5;
 }
 
-resize()
-
 addEventListener("resize", resize);
 
 addEventListener("mousemove", (e) => {
@@ -23,7 +21,7 @@ class Player{
         this.y=innerHeight/2;
         this.size=100;
         this.controls=[];
-        this.speed=5;
+        this.speed=12;
         this.angle=0;
         this.mx=this.x;
         this.my=this.y;
@@ -36,6 +34,9 @@ class Player{
         c.translate(this.x,this.y)
         c.rotate(this.angle+Math.PI/2)
         c.drawImage(img,-this.size/2, -this.size/2, this.size,this.size)
+        c.beginPath();
+        c.arc(0,0,this.size/2,0,Math.PI*2);
+        c.stroke();
         c.restore();
     }
     update(){
@@ -45,13 +46,13 @@ class Player{
             this.x-=this.speed;
         }
         if( this.controls.includes("right") ){
-            this.x+=this.speed;
+            this.x+=this.speed/1.5;
         }
         if( this.controls.includes("up") ){
-            this.y-=this.speed;
+            this.y-=this.speed/1.2;
         }
         if( this.controls.includes("down") ){
-            this.y+=this.speed;
+            this.y+=this.speed/1.2;
         }
 
         if(this.x <0){
@@ -66,19 +67,18 @@ class Player{
     }
 }
 
-var projectiles=[];
-
 class Projectile{
     constructor(x,y,angle){
         this.x=x;
         this.y=y;
         this.angle=angle;
-        this.speed=7;
+        this.size=10;
+        this.speed=15;
     }
     draw(){
         this.update()
         c.beginPath();
-        c.arc(this.x, this.y, 10, 0, Math.PI*2);
+        c.arc(this.x, this.y, this.size, 0, Math.PI*2);
         c.fillStyle="red"
         c.fill();
     }
@@ -87,6 +87,35 @@ class Projectile{
         this.y+=this.speed*Math.sin(this.angle);
     }
 }
+
+class Enemy{
+    constructor(type){
+        this.x=innerWidth;
+        this.y=Math.random()*innerHeight;
+        this.speed=8;
+        this.type=type;
+        this.hearts=type;
+        this.size=80;
+    }
+    draw(){
+        this.update();
+        let img=new Image();
+        img.src=`svgs/${this.type}.svg`;
+        c.save();
+        c.translate(this.x,this.y);
+        c.drawImage(img,-this.size/2,-this.size/2,this.size,this.size);
+        c.beginPath();
+        c.arc(0,0,this.size/2,0,Math.PI*2);
+        c.stroke();
+        c.restore();
+    }
+    update(){
+        this.x-=this.speed;
+    }
+}
+
+var projectiles=[];
+var enemies=[];
 
 addEventListener("click", () => {
     projectiles.push(new Projectile(player.x, player.y, player.angle))
@@ -154,10 +183,17 @@ function Cleanup(){
             i--;
         }
     }
+    if(enemies.length){
+        if(enemies[0].x<0 ){
+        enemies.splice(0,1)
+        }
+    }
 }
 
+var reqId;
+
 function play(){
-    requestAnimationFrame(play);
+    reqId=requestAnimationFrame(play);
     c.clearRect(0,0,innerWidth,innerHeight)
 
     Cleanup();
@@ -165,9 +201,75 @@ function play(){
         e.draw();
     })
 
+    enemies.forEach( (e) =>{
+        e.draw();
+    })
+
     player.draw()
 
-    console.log(projectiles)
+    checkCollisions()
+    isPlayerLive()
+
 }
 
-play()
+function start(){
+    document.getElementById("start-box").style.display="none"
+    resize();
+    player=new Player();
+    projectiles=[];
+    enemies=[];
+    genEnemies();
+    play();    
+}
+
+function restart(){
+    document.getElementById("end-box").style.display="none"
+    resize();
+    player=new Player();
+    projectiles=[];
+    enemies=[];
+    genEnemies();
+    play(); 
+}
+
+var EnemySpawn;
+function genEnemies(){
+        enemies.push( new Enemy(1) )
+        
+        EnemySpawn=setTimeout(() => {
+            genEnemies();
+        }, 1000);
+    
+}
+
+function checkCollisions(){
+    enemies.forEach( (e)=>{
+        projectiles.forEach((p)=>{
+            let d=Math.sqrt(Math.pow(e.x-p.x,2)+Math.pow(e.y-p.y,2))
+            if( d < e.size+p.size ){
+                e.hearts-=1;
+                projectiles.splice( projectiles.findIndex( (d) => d==p) , 1)
+                if(e.hearts==0){
+                    enemies.splice( enemies.findIndex( (d) => d==e) , 1)
+                    console.log("collision detected")
+                }
+
+            }
+        })
+    })
+}
+
+function isPlayerLive(){
+    enemies.forEach((e)=>{
+        let d=Math.sqrt(Math.pow(e.x-player.x,2)+Math.pow(e.y-player.y,2))
+        if( d < (e.size+player.size)/2 ){
+            terminate();
+        }
+    })
+}
+
+function terminate(){
+    cancelAnimationFrame(reqId)
+    clearTimeout(EnemySpawn)
+    document.getElementById("end-box").style.display=""
+}

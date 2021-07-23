@@ -20,7 +20,7 @@
     grid-template-columns: repeat(3,1fr);
     grid-template-rows: repeat(3,1fr);
 }
-#end-box{
+#end-box , #start-box{
     padding: 1rem;
     display: grid;
     justify-content: center;
