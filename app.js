@@ -73,7 +73,7 @@ class Projectile{
         this.y=y;
         this.angle=angle;
         this.size=10;
-        this.speed=15;
+        this.speed=15 + 4* level;
     }
     draw(){
         this.update()
@@ -92,7 +92,7 @@ class Enemy{
     constructor(type){
         this.x=innerWidth;
         this.y=Math.random()*innerHeight;
-        this.speed=8;
+        this.speed=8 + 4*level;
         this.type=type;
         this.hearts=type;
         this.size=80;
@@ -116,6 +116,7 @@ class Enemy{
 
 var projectiles=[];
 var enemies=[];
+var score=0;
 
 addEventListener("click", () => {
     projectiles.push(new Projectile(player.x, player.y, player.angle))
@@ -208,6 +209,7 @@ function play(){
     player.draw()
 
     checkCollisions()
+    updateScore()
     isPlayerLive()
 
 }
@@ -219,6 +221,10 @@ function start(){
     projectiles=[];
     enemies=[];
     genEnemies();
+    level=0;;
+    secs=0;
+    score=0;
+    time();
     play();    
 }
 
@@ -229,8 +235,18 @@ function restart(){
     projectiles=[];
     enemies=[];
     genEnemies();
+    level=0;
+    secs=0;
+    score=0;
+    time();
     play(); 
 }
+
+function updateScore(){
+    document.getElementById("score").innerHTML=`SCORE ${score}`
+}
+
+var level=0;
 
 var EnemySpawn;
 function genEnemies(){
@@ -251,7 +267,15 @@ function checkCollisions(){
                 projectiles.splice( projectiles.findIndex( (d) => d==p) , 1)
                 if(e.hearts==0){
                     enemies.splice( enemies.findIndex( (d) => d==e) , 1)
-                    console.log("collision detected")
+                    d=Math.sqrt(Math.pow(e.x-player.x,2)+Math.pow(e.y-player.y,2))
+                    console.log(d/player.size)
+                    if (d<player.size*4){
+                        score+=50;
+                    }else if(d<player.size*7){
+                        score+=100;
+                    }else{
+                        score+=300;
+                    }
                 }
 
             }
@@ -268,8 +292,28 @@ function isPlayerLive(){
     })
 }
 
+var secs=0;
+var timeId;
+function time(){
+    secs+=1;
+    let sec=secs%60;
+    let min=Math.floor(secs/60);
+    min= min < 10 ? '0'+ min : min;
+    sec= sec < 10 ? '0'+ sec : sec;
+    document.getElementById("time").innerHTML=`TIME - ${min}:${sec}`;
+    if(secs%30==0){
+        score+=2000;
+        level+=1;
+        player.speed+=5;
+    }
+    timeId=setTimeout(() => {
+        time()
+    }, 1000);
+}
+
 function terminate(){
     cancelAnimationFrame(reqId)
     clearTimeout(EnemySpawn)
+    clearTimeout(timeId)
     document.getElementById("end-box").style.display=""
 }
