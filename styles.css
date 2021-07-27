@@ -71,16 +71,32 @@ button{
 h1{
     text-align: center;
     font-size: 3rem;
-    padding: 1rem;
+    margin: 1rem
 }
 ul{
-    padding: 1rem;
+    padding: 1rem 3rem; 
 }
-
+li{
+    font-size: 1.3rem;
+}
+p{
+    font-size: 1.3rem;
+}
 h2{
     text-align: center;
     margin: 1rem;
 }
 canvas{
     background-color:#1d1135;
+}
+#powerups{
+    background-color: #ba1e68;
+    color: #ebdfb5;
+    border-radius: .5rem;
+    padding: 1rem;
+    align-self:flex-end;
+    justify-self: right;
+    grid-row: 3;
+    grid-column: 3;
+    height: 2rem;
 }

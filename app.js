@@ -26,6 +26,8 @@ class Player{
         this.angle=0;
         this.mx=this.x;
         this.my=this.y;
+        this.powerups=0;
+        this.invincible=false;
     }
     draw(){
         this.update()
@@ -101,9 +103,15 @@ class Enemy{
     draw(){
         this.update();
         let img=new Image();
-        img.src=`svgs/${this.type}.jpg`;
+        img.src=`svgs/${this.type}.png`;
         c.save();
         c.translate(this.x,this.y);
+
+        c.fillStyle="rgba( 200,200,200,.5)"
+        c.beginPath();
+        c.arc(0,0,this.size/2,0,Math.PI*2);
+        c.fill();
+
         c.drawImage(img,-this.size/2,-this.size/2,this.size,this.size);
         /*c.beginPath();
         c.arc(0,0,this.size/2,0,Math.PI*2);
@@ -164,7 +172,11 @@ addEventListener("keyup", (e)=>{
         }
     }
 })
-
+addEventListener("keydown", (e) =>{
+    if(e.key==" "){
+        powerup();
+    }
+})
 function Cleanup(){
     for (let i=0; i<projectiles.length; i++){
         let x=projectiles[i].x;
@@ -209,11 +221,11 @@ function play(){
     })
 
     player.draw()
-
     checkCollisions()
     updateScore()
+    if (!player.invincible){
     isPlayerLive()
-
+    }
 }
 
 function start(){
@@ -222,8 +234,9 @@ function start(){
     player=new Player();
     projectiles=[];
     enemies=[];
-    genEnemies();
     level=0;
+    genEnemies();
+    document.getElementById("level").innerHTML=`LEVEL ${level}`
     secs=0;
     score=0;
     time();
@@ -236,8 +249,9 @@ function restart(){
     player=new Player();
     projectiles=[];
     enemies=[];
-    genEnemies();
     level=0;
+    genEnemies();
+    document.getElementById("level").innerHTML=`LEVEL ${level}`
     secs=0;
     score=0;
     time();
@@ -252,7 +266,6 @@ var level=0;
 
 var EnemySpawn;
 function genEnemies(){
-    console.log(enemies)
     if(live){
         let t = Math.floor(100*Math.random()%6);
         if(t && t<level+2){
@@ -276,13 +289,12 @@ function checkCollisions(){
                 if(e.hearts==0){
                     enemies.splice( enemies.findIndex( (d) => d==e) , 1)
                     d=Math.sqrt(Math.pow(e.x-player.x,2)+Math.pow(e.y-player.y,2))
-                    console.log(d/player.size)
                     if (d<player.size*4){
-                        score+=50;
+                        score+=30*(level+1)*e.type;
                     }else if(d<player.size*7){
-                        score+=100;
+                        score+=60*(level+1)*e.type;
                     }else{
-                        score+=300;
+                        score+=100*(level+1)*e.type;
                     }
                 }
 
@@ -311,6 +323,8 @@ function time(){
     if(secs%30==0){
         score+=2000;
         level+=1;
+        player.powerups+=1;
+        document.getElementById("powerups").innerHTML=` POWERUPS ${player.powerups}`
         document.getElementById("level").innerHTML=`LEVEL ${level}`
         player.speed+=3;
     }
@@ -320,8 +334,6 @@ function time(){
 }
 
 function terminate(){
-    c.fillStyle="rgba(0,0,0,0.1)"
-    c.fillRect(0,0,c.canvas.width,c.canvas.height)
     cancelAnimationFrame(reqId)
     clearTimeout(EnemySpawn)
     clearTimeout(timeId)
@@ -334,4 +346,21 @@ function terminate(){
     }
     document.getElementById("end-score").innerHTML=score;
     document.getElementById("end-highscore").innerHTML=` HIGHSCORE - ${localStorage.getItem("highscore")}`
+}
+
+function powerup(){
+    if((!player.invincible) && (player.powerups!=0)){
+        player.invincible=true;
+        const a= new Audio();
+        a.src="sounds/powerup.mp3"
+        a.play();
+        player.powerups-=1;
+        document.getElementById("powerups").innerHTML=` POWERUPS ${player.powerups}`
+        setTimeout(() => {
+            const a= new Audio();
+            a.src="sounds/powerdown.mp3"
+            a.play();
+            player.invincible=false;
+        }, 4000);
+    }
 }
