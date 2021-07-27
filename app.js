@@ -1,7 +1,7 @@
 const canvas=document.getElementById("canvas")
 const c=canvas.getContext("2d")
 
-c.canvas.background="black"
+c.canvas.background="rgba(50,50,50,.8)"
 
 function resize(){
     c.canvas.width=innerWidth-5;
@@ -74,7 +74,7 @@ class Projectile{
         this.y=y;
         this.angle=angle;
         this.size=10;
-        this.speed=15 + 4* level;
+        this.speed=15 + 2* level;
     }
     draw(){
         this.update()
@@ -93,7 +93,7 @@ class Enemy{
     constructor(type){
         this.x=innerWidth;
         this.y=Math.random()*innerHeight;
-        this.speed=8 + 4*level;
+        this.speed=8 + 2*level;
         this.type=type;
         this.hearts=type;
         this.size=80;
@@ -101,7 +101,7 @@ class Enemy{
     draw(){
         this.update();
         let img=new Image();
-        img.src=`svgs/${this.type}.svg`;
+        img.src=`svgs/${this.type}.jpg`;
         c.save();
         c.translate(this.x,this.y);
         c.drawImage(img,-this.size/2,-this.size/2,this.size,this.size);
@@ -117,6 +117,7 @@ class Enemy{
 
 var projectiles=[];
 var enemies=[];
+var live=1;
 var score=0;
 
 addEventListener("click", () => {
@@ -251,12 +252,18 @@ var level=0;
 
 var EnemySpawn;
 function genEnemies(){
-        enemies.push( new Enemy(1) )
-        
+    console.log(enemies)
+    if(live){
+        let t = Math.floor(100*Math.random()%6);
+        if(t && t<level+2){
+            enemies.push( new Enemy(t) )
+        }else if(t){
+            enemies.push( new Enemy(level+1))
+        }
         EnemySpawn=setTimeout(() => {
             genEnemies();
         }, 1000);
-    
+    }
 }
 
 function checkCollisions(){
@@ -292,7 +299,6 @@ function isPlayerLive(){
         }
     })
 }
-
 var secs=0;
 var timeId;
 function time(){
@@ -306,7 +312,7 @@ function time(){
         score+=2000;
         level+=1;
         document.getElementById("level").innerHTML=`LEVEL ${level}`
-        player.speed+=5;
+        player.speed+=3;
     }
     timeId=setTimeout(() => {
         time()
