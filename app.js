@@ -1,12 +1,13 @@
 const canvas=document.getElementById("canvas")
 const c=canvas.getContext("2d")
 
-c.canvas.background="rgba(50,50,50,.8)"
+c.canvas.background="black"
 
 function resize(){
     c.canvas.width=innerWidth-5;
     c.canvas.height=innerHeight-5;
 }
+resize()
 
 addEventListener("resize", resize);
 
@@ -34,9 +35,9 @@ class Player{
         c.translate(this.x,this.y)
         c.rotate(this.angle+Math.PI/2)
         c.drawImage(img,-this.size/2, -this.size/2, this.size,this.size)
-        c.beginPath();
+        /*c.beginPath();
         c.arc(0,0,this.size/2,0,Math.PI*2);
-        c.stroke();
+        c.stroke();*/
         c.restore();
     }
     update(){
@@ -79,7 +80,7 @@ class Projectile{
         this.update()
         c.beginPath();
         c.arc(this.x, this.y, this.size, 0, Math.PI*2);
-        c.fillStyle="red"
+        c.fillStyle="#f7df88"
         c.fill();
     }
     update(){
@@ -104,9 +105,9 @@ class Enemy{
         c.save();
         c.translate(this.x,this.y);
         c.drawImage(img,-this.size/2,-this.size/2,this.size,this.size);
-        c.beginPath();
+        /*c.beginPath();
         c.arc(0,0,this.size/2,0,Math.PI*2);
-        c.stroke();
+        c.stroke();*/
         c.restore();
     }
     update(){
@@ -144,19 +145,19 @@ addEventListener("keydown", (e)=>{
 })
 
 addEventListener("keyup", (e)=>{
-    if(e.key=="a" || e.key=="ArrowLeft"){
+    if(e.key=="a" || e.key=="ArrowLeft" || e.key=="A"){
         if( player.controls.includes("left") ){
             player.controls.splice(player.controls.findIndex( (e) => e=="left" ),1)
         }
-    }else if(e.key=="w" || e.key=="ArrowUp"){
+    }else if(e.key=="w" || e.key=="ArrowUp" ||e.key=="W"){
         if( player.controls.includes("up") ){
             player.controls.splice(player.controls.findIndex((e) => e=="up"),1)
         }
-    }else if(e.key=="s" || e.key=="ArrowDown"){
+    }else if(e.key=="s" || e.key=="ArrowDown" ||e.key=="S"){
         if( player.controls.includes("down") ){
             player.controls.splice(player.controls.findIndex((e) => e=="down"),1)
         }
-    }else if(e.key=="d" || e.key=="ArrowRight"){
+    }else if(e.key=="d" || e.key=="ArrowRight" || e.key=="D"){
         if( player.controls.includes("right") ){
             player.controls.splice(player.controls.findIndex((e) => e=="right"),1)
         }
@@ -221,7 +222,7 @@ function start(){
     projectiles=[];
     enemies=[];
     genEnemies();
-    level=0;;
+    level=0;
     secs=0;
     score=0;
     time();
@@ -304,6 +305,7 @@ function time(){
     if(secs%30==0){
         score+=2000;
         level+=1;
+        document.getElementById("level").innerHTML=`LEVEL ${level}`
         player.speed+=5;
     }
     timeId=setTimeout(() => {
@@ -312,6 +314,8 @@ function time(){
 }
 
 function terminate(){
+    c.fillStyle="rgba(0,0,0,0.1)"
+    c.fillRect(0,0,c.canvas.width,c.canvas.height)
     cancelAnimationFrame(reqId)
     clearTimeout(EnemySpawn)
     clearTimeout(timeId)
